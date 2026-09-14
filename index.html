@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supplier Concern Management</title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f6fa;color:#172033}header{background:#173b72;color:#fff;padding:18px 20px;position:sticky;top:0;z-index:5}header h1{margin:0 0 5px;font-size:25px}header .by{opacity:.9;font-size:14px}main{max-width:1500px;margin:auto;padding:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel,.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px #0001;margin-bottom:16px}.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.card .label{font-size:13px;color:#657084}.num{font-size:28px;font-weight:700;margin-top:5px}input,select,textarea,button{padding:10px;margin:4px 0;border:1px solid #ccd3df;border-radius:7px;font:inherit}input,select,textarea{width:100%;background:#fff}textarea{min-height:80px;resize:vertical}button{background:#1769aa;color:#fff;border:0;cursor:pointer;padding:10px 13px}button:hover{filter:brightness(.95)}button.secondary{background:#5b677a}.danger{background:#c62828}.good{color:#16833b}.bad{color:#c62828}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.full{grid-column:1/-1}table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #e3e7ed;text-align:left;font-size:13px;vertical-align:top}th{background:#f7f9fc;position:sticky;top:0;z-index:1}.scroll{overflow:auto;max-height:420px}.click{color:#1769aa;font-weight:700;cursor:pointer}.click:hover{text-decoration:underline}.badge{display:inline-block;padding:4px 8px;border-radius:12px;font-size:12px;font-weight:700}.Open{background:#fff0c9;color:#8a6200}.Closed{background:#d9f5e4;color:#146b37}.barbg{height:18px;background:#e8edf3;border-radius:10px;overflow:hidden}.bar{height:100%;background:#1769aa;border-radius:10px}.chartrow{margin:10px 0}.chartrow .top{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:4px}.hint{font-size:12px;color:#6c7687}.actions{display:flex;gap:5px;flex-wrap:wrap}.actions button{padding:6px 9px;font-size:12px}.modal{display:none;position:fixed;inset:0;background:#0008;padding:20px;z-index:20}.modal>div{background:#fff;max-width:950px;margin:3vh auto;padding:20px;border-radius:12px;max-height:90vh;overflow:auto}.modalHead{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.mini{background:#f6f8fb;padding:10px;border-radius:8px}.mini b{font-size:20px;display:block}.empty{padding:20px;text-align:center;color:#7a8494}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar input{max-width:360px}.notice{background:#eef6ff;border-left:4px solid #1769aa;padding:10px;margin:8px 0;font-size:13px}.tag{display:inline-block;background:#edf2f7;padding:3px 7px;border-radius:10px;font-size:12px;margin:2px}.supplierParts{font-size:12px;color:#596579}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:650px){header h1{font-size:20px}.cards{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}th,td{font-size:12px}.panel{padding:12px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script></head>
+<body>
+<header>
+  <h1>Supplier Concern Management Dashboard</h1>
+  <div class="by">Prepared by - Amin Sayyad</div>
+</header>
+<main>
+  <div class="panel"><h2>Data Sharing & Reports</h2><div class="actions"><button onclick="exportExcel()">📊 Export All Data to Excel</button><button onclick="shareWhatsApp()">📱 Share Supplier Report on WhatsApp</button><button onclick="shareEmail()">📧 Share Excel Data by Email</button><button onclick="makeConcernPPT()">📑 Make Concern PPT</button></div><div class="hint">Select a supplier in the filter for supplier-specific sharing; otherwise you can enter a Supplier ID.</div></div>
+  <div class="cards">
+    <div class="card"><div class="label">Total Concerns</div><div class="num" id="total">0</div></div>
+    <div class="card"><div class="label">Open</div><div class="num" id="open">0</div></div>
+    <div class="card"><div class="label">Closed</div><div class="num good" id="closed">0</div></div>
+    <div class="card"><div class="label">Suppliers</div><div class="num" id="supc">0</div></div>
+    <div class="card"><div class="label">Parts</div><div class="num" id="partc">0</div></div>
+    <div class="card"><div class="label">Open %</div><div class="num" id="openpct">0%</div></div>
+  </div>
+
+  <div class="grid">
+    <section>
+      <div class="panel">
+        <h2>Add Supplier</h2>
+        <div class="form">
+          <input id="sn" placeholder="Supplier name *">
+          <input id="sc" placeholder="Contact number">
+          <input id="se" class="full" placeholder="Email (optional)">
+        </div>
+        <button type="button" id="addSupplierBtn">+ Add Supplier</button>
+      </div>
+
+      <div class="panel">
+        <h2>Add Part</h2>
+        <div class="form">
+          <input id="pn" placeholder="Part name / number *">
+          <select id="ps"><option value="">Select Supplier *</option></select>
+          <input id="pd" class="full" placeholder="Part description (optional)">
+        </div>
+        <div class="hint">Supplier select karne se clear rahega ki ye part kis supplier ke pass hai.</div>
+        <button type="button" id="addPartBtn">+ Add Part</button>
+      </div>
+
+      <div class="panel">
+        <h2>Add Concern</h2>
+        <div class="form">
+          <input id="dt" type="date">
+          <select id="su" onchange="syncPartsForSupplier()"><option value="">Select Supplier *</option></select>
+          <select id="pa" onchange="syncSupplierFromPart()"><option value="">Select Part *</option></select>
+          <select id="st"><option value="Open">Open</option><option value="Closed">Closed</option></select>
+          <input id="ct" class="full" placeholder="Concern title *">
+          <textarea id="cd" class="full" placeholder="Details / action / remarks"></textarea>
+        </div>
+        <button type="button" id="addConcernBtn">+ Save Concern</button>
+      </div>
+
+      <div class="panel">
+        <h2>Date Wise Concern List</h2>
+        <div class="toolbar">
+          <input id="q" placeholder="Search supplier / part / concern" oninput="render()">
+          <select id="fq" onchange="render()"><option value="">All Suppliers</option></select>
+          <select id="fp" onchange="render()"><option value="">All Parts</option></select>
+          <select id="fs" onchange="render()"><option value="">All Status</option><option>Open</option><option>Closed</option></select>
+        </div>
+        <div class="scroll">
+          <table><thead><tr><th>Date</th><th>Supplier</th><th>Part</th><th>Concern</th><th>Status</th><th>Action</th></tr></thead><tbody id="ctable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="panel">
+        <h2>Supplier Wise</h2>
+        <div class="scroll"><table><thead><tr><th>Supplier</th><th>Parts</th><th>Total</th><th>Closed</th><th>Open</th><th>Performance</th><th>Contact</th></tr></thead><tbody id="stable"></tbody></table></div>
+      </div>
+
+      <div class="panel">
+        <h2>Part Wise</h2>
+        <div class="scroll"><table><thead><tr><th>Part</th><th>Supplier</th><th>Total</th><th>Closed</th><th>Open</th></tr></thead><tbody id="ptable"></tbody></table></div>
+        <div class="hint">Part par click karke same part ke saare supplier-wise concerns dekh sakte hain.</div>
+      </div>
+
+      <div class="panel"><h2>Supplier Concern Graph</h2><div id="sg"></div></div>
+      <div class="panel"><h2>Part Wise Graph</h2><div id="pg"></div></div>
+      <div class="panel"><h2>Supplier Performance</h2><div id="perf"></div></div>
+      <div class="panel"><h2>Backup / Restore</h2><div class="actions"><button onclick="backup()">Export JSON</button><label><input type="file" id="imp" accept=".json" onchange="restore(event)" style="display:none"><button class="secondary" onclick="document.getElementById('imp').click()">Import JSON</button></label><button class="danger" onclick="wipe()">Clear All Data</button></div></div>
+    </section>
+  </div>
+</main>
+
+<div class="modal" id="modal"><div><div class="modalHead"><div id="mb"></div><button class="secondary" onclick="closeM()">Close</button></div></div></div>
+
+<script>
+const KEY='SCDB';
+function loadDB(){try{return JSON.parse(localStorage.getItem(KEY)||'{"suppliers":[],"parts":[],"concerns":[]}')}catch(e){return {suppliers:[],parts:[],concerns:[]}}}
+let db=loadDB();
+// Old version used "Band". It is removed now; old Band records are treated as Closed so data is not lost.
+db.concerns=(db.concerns||[]).map(x=>({...x,status:x.status==='Band'?'Closed':(x.status==='Closed'?'Closed':'Open')}));
+const $=id=>document.getElementById(id);
+$('dt').value=new Date().toISOString().slice(0,10);
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function supplierName(id){return db.suppliers.find(x=>x.id==id)?.name||'Unknown Supplier'}
+function partName(id){return db.parts.find(x=>x.id==id)?.name||'Unknown Part'}
+function supplierContact(id){return db.suppliers.find(x=>x.id==id)?.contact||''}
+function partSupplier(id){return db.parts.find(x=>x.id==id)?.supplier||''}
+function addSupplier(){let name=$('sn').value.trim();if(!name){alert('Supplier name required');$('sn').focus();return false}db.suppliers.push({id:Date.now()+Math.floor(Math.random()*1000),name,contact:$('sc').value.trim(),email:$('se').value.trim()});$('sn').value='';$('sc').value='';$('se').value='';save();alert('Supplier added successfully.');return false}
+function addPart(){let name=$('pn').value.trim(),supplier=parseInt($('ps').value,10);if(!name||!supplier){alert('Part name and Supplier required');return false}db.parts.push({id:Date.now()+Math.floor(Math.random()*1000),name,desc:$('pd').value.trim(),supplier});$('pn').value='';$('pd').value='';$('ps').value='';save();alert('Part added successfully.');return false}
+function addConcern(){let supplier=parseInt($('su').value,10),part=parseInt($('pa').value,10),title=$('ct').value.trim();if(!supplier||!part||!title){alert('Supplier, Part and Concern required');return false}let p=db.parts.find(x=>x.id==part);if(p&&p.supplier&&p.supplier!==supplier){if(!confirm('Selected part is assigned to '+supplierName(p.supplier)+'. Save with selected supplier anyway?'))return}db.concerns.push({id:Date.now(),date:$('dt').value||new Date().toISOString().slice(0,10),supplier,part,status:$('st').value,title,details:$('cd').value.trim()});$('ct').value='';$('cd').value='';save();alert('Concern saved successfully.');return false}
+function populate(){
+  let oldS=$('su').value,oldP=$('pa').value,oldPS=$('ps').value;
+  $('su').innerHTML='<option value="">Select Supplier *</option>'+db.suppliers.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+  $('ps').innerHTML='<option value="">Select Supplier *</option>'+db.suppliers.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+  $('fq').innerHTML='<option value="">All Suppliers</option>'+db.suppliers.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+  $('fp').innerHTML='<option value="">All Parts</option>'+db.parts.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
+  if(oldS && db.suppliers.some(x=>x.id==oldS))$('su').value=oldS;
+  if(oldPS && db.suppliers.some(x=>x.id==oldPS))$('ps').value=oldPS;
+  syncPartsForSupplier(oldP);
+}
+function syncPartsForSupplier(preferred){let sid=+$('su').value;let current=preferred||$('pa').value;let parts=sid?db.parts.filter(p=>p.supplier==sid):db.parts;$('pa').innerHTML='<option value="">Select Part *</option>'+parts.map(x=>`<option value="${x.id}">${esc(x.name)} — ${esc(supplierName(x.supplier))}</option>`).join('');if(current&&parts.some(x=>x.id==current))$('pa').value=current}
+function syncSupplierFromPart(){let p=db.parts.find(x=>x.id==+$('pa').value);if(p){$('su').value=p.supplier;syncPartsForSupplier(p.id)}}
+function statusButton(x){return `<button onclick="toggleStatus(${x.id})">${x.status==='Open'?'Mark Closed':'Reopen'}</button>`}
+function render(){
+  populate();let all=db.concerns||[],q=($('q').value||'').toLowerCase(),fs=$('fs').value,fq=+$('fq').value,fp=+$('fp').value;
+  $('total').textContent=all.length;$('open').textContent=all.filter(x=>x.status==='Open').length;$('closed').textContent=all.filter(x=>x.status==='Closed').length;$('supc').textContent=db.suppliers.length;$('partc').textContent=db.parts.length;$('openpct').textContent=(all.length?Math.round(all.filter(x=>x.status==='Open').length/all.length*100):0)+'%';
+  let a=all.filter(x=>{let text=(supplierName(x.supplier)+' '+partName(x.part)+' '+x.title+' '+(x.details||'')).toLowerCase();return text.includes(q)&&(!fs||x.status===fs)&&(!fq||x.supplier===fq)&&(!fp||x.part===fp)}).sort((x,y)=>y.date.localeCompare(x.date)||y.id-x.id);
+  $('ctable').innerHTML=a.length?a.map(x=>`<tr><td>${esc(x.date)}</td><td class="click" onclick="supplierDetail(${x.supplier})">${esc(supplierName(x.supplier))}</td><td class="click" onclick="partDetail(${x.part})">${esc(partName(x.part))}</td><td title="${esc(x.details)}"><b>${esc(x.title)}</b><div class="hint">${esc(x.details||'')}</div></td><td><span class="badge ${x.status}">${x.status}</span></td><td><div class="actions">${statusButton(x)}<button class="danger" onclick="delConcern(${x.id})">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty">No concerns found.</td></tr>';
+  supplierRender();partRender();
+}
+function toggleStatus(id){let x=db.concerns.find(x=>x.id==id);if(x){x.status=x.status==='Open'?'Closed':'Open';save()}}
+function delConcern(id){if(confirm('Delete concern?')){db.concerns=db.concerns.filter(x=>x.id!=id);save()}}
+function supplierRender(){
+  let r=db.suppliers.map(s=>{let a=db.concerns.filter(x=>x.supplier==s.id),parts=[...new Set(a.map(x=>x.part))];let cl=a.filter(x=>x.status==='Closed').length,op=a.filter(x=>x.status==='Open').length;return{s,a,parts,cl,op,closure:a.length?Math.round(cl/a.length*100):0}}).sort((a,b)=>b.a.length-a.a.length);
+  $('stable').innerHTML=r.length?r.map(x=>`<tr><td class="click" onclick="supplierDetail(${x.s.id})">${esc(x.s.name)}</td><td>${x.parts.length}</td><td>${x.a.length}</td><td>${x.cl}</td><td>${x.op}</td><td>${x.a.length?(x.closure>=80?'🟢 Good':x.closure>=50?'🟡 Average':'🔴 Needs Attention'):'—'}</td><td>${x.s.contact?`<a href="tel:${esc(x.s.contact)}">📞 Call</a>`:'-'}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">No suppliers added.</td></tr>';
+  let m=Math.max(1,...r.map(x=>x.a.length));$('sg').innerHTML=r.length?r.map(x=>`<div class="chartrow"><div class="top"><span class="click" onclick="supplierDetail(${x.s.id})">${esc(x.s.name)}</span><b>${x.a.length}</b></div><div class="barbg"><div class="bar" style="width:${x.a.length/m*100}%"></div></div></div>`).join(''):'<div class="empty">Add concerns to see graph.</div>';
+  let act=r.filter(x=>x.a.length),bad=[...act].sort((a,b)=>b.a.length-a.a.length)[0],low=[...act].sort((a,b)=>a.a.length-b.a.length)[0],best=[...act].sort((a,b)=>b.closure-a.closure||a.a.length-b.a.length)[0];
+  $('perf').innerHTML=act.length?`<div class="notice">🔴 <b>Highest Concern Supplier:</b> ${esc(bad.s.name)} — ${bad.a.length} concern(s)</div><div class="notice">🟢 <b>Lowest Concern Supplier:</b> ${esc(low.s.name)} — ${low.a.length} concern(s)</div><div class="notice">⭐ <b>Best Closure Performance:</b> ${esc(best.s.name)} — ${best.closure}% closed</div>`:'<div class="empty">No concern data yet.</div>';
+}
+function partRender(){
+  let r=db.parts.map(p=>{let a=db.concerns.filter(x=>x.part==p.id),cl=a.filter(x=>x.status==='Closed').length,op=a.filter(x=>x.status==='Open').length;return{p,a,cl,op}}).sort((a,b)=>b.a.length-a.a.length);
+  $('ptable').innerHTML=r.length?r.map(x=>`<tr><td class="click" onclick="partDetail(${x.p.id})">${esc(x.p.name)}</td><td>${esc(supplierName(x.p.supplier))}</td><td>${x.a.length}</td><td>${x.cl}</td><td>${x.op}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No parts added.</td></tr>';
+  let m=Math.max(1,...r.map(x=>x.a.length));$('pg').innerHTML=r.length?r.map(x=>`<div class="chartrow"><div class="top"><span class="click" onclick="partDetail(${x.p.id})">${esc(x.p.name)} — ${esc(supplierName(x.p.supplier))}</span><b>${x.a.length}</b></div><div class="barbg"><div class="bar" style="width:${x.a.length/m*100}%"></div></div></div>`).join(''):'<div class="empty">Add parts/concerns to see graph.</div>';
+}
+function supplierDetail(id){let s=db.suppliers.find(x=>x.id==id);if(!s)return;let a=db.concerns.filter(x=>x.supplier==id).sort((x,y)=>y.date.localeCompare(x.date));let cl=a.filter(x=>x.status==='Closed').length,op=a.filter(x=>x.status==='Open').length;let groups={};a.forEach(x=>(groups[x.part]??=[]).push(x));$('mb').innerHTML=`<h2>${esc(s.name)}</h2><p>${s.contact?`📞 <a href="tel:${esc(s.contact)}">${esc(s.contact)}</a>`:'No contact'} ${s.email?' · '+esc(s.email):''}</p><div class="summary"><div class="mini">Total<b>${a.length}</b></div><div class="mini">Open<b>${op}</b></div><div class="mini">Closed<b>${cl}</b></div><div class="mini">Closure %<b>${a.length?Math.round(cl/a.length*100):0}%</b></div></div><h3>Part-wise concerns</h3>${Object.keys(groups).length?Object.keys(groups).map(pid=>{let arr=groups[pid],c=arr.filter(x=>x.status==='Closed').length,o=arr.filter(x=>x.status==='Open').length;return `<div class="notice"><b>${esc(partName(pid))}</b> — Total ${arr.length}, Closed ${c}, Open ${o}</div>`}).join(''):'<div class="empty">No concerns for this supplier.</div>'}<h3>Concern Details</h3><div class="scroll"><table><tr><th>Date</th><th>Part</th><th>Concern</th><th>Status</th></tr>${a.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(partName(x.part))}</td><td><b>${esc(x.title)}</b><div class="hint">${esc(x.details||'')}</div></td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join('')}</table></div>`;$('modal').style.display='block'}
+function partDetail(id){let p=db.parts.find(x=>x.id==id);if(!p)return;let a=db.concerns.filter(x=>x.part==id).sort((x,y)=>y.date.localeCompare(x.date));let cl=a.filter(x=>x.status==='Closed').length,op=a.filter(x=>x.status==='Open').length;let suppliers=[...new Set(a.map(x=>x.supplier))];$('mb').innerHTML=`<h2>${esc(p.name)}</h2><p><b>Assigned Supplier:</b> ${esc(supplierName(p.supplier))}</p><p>${esc(p.desc||'')}</p><div class="summary"><div class="mini">Total<b>${a.length}</b></div><div class="mini">Open<b>${op}</b></div><div class="mini">Closed<b>${cl}</b></div><div class="mini">Suppliers<b>${suppliers.length}</b></div></div><h3>Same Part — Supplier Wise</h3>${suppliers.length?suppliers.map(sid=>{let arr=a.filter(x=>x.supplier==sid),c=arr.filter(x=>x.status==='Closed').length,o=arr.filter(x=>x.status==='Open').length;return `<div class="notice"><b>${esc(supplierName(sid))}</b> — Total ${arr.length}, Closed ${c}, Open ${o} ${supplierContact(sid)?`· <a href="tel:${esc(supplierContact(sid))}">📞 Call</a>`:''}</div>`}).join(''):'<div class="empty">No concerns for this part.</div>'}<h3>Concern Details</h3><div class="scroll"><table><tr><th>Date</th><th>Supplier</th><th>Concern</th><th>Status</th></tr>${a.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(supplierName(x.supplier))}</td><td><b>${esc(x.title)}</b><div class="hint">${esc(x.details||'')}</div></td><td><span class="badge ${x.status}">${x.status}</span></td></tr>`).join('')}</table></div>`;$('modal').style.display='block'}
+function closeM(){$('modal').style.display='none'}
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
+function excelRows(){return (db.concerns||[]).map(x=>({Date:x.date,Supplier:supplierName(x.supplier),"Supplier Contact":supplierContact(x.supplier),"Supplier Email":(db.suppliers.find(s=>s.id==x.supplier)?.email||""),Part:partName(x.part),"Concern Title":x.title,Details:x.details||"",Status:x.status}));}
+function supplierRows(){return db.suppliers.map(s=>{let a=db.concerns.filter(x=>x.supplier==s.id),c=a.filter(x=>x.status==="Closed").length;return {Supplier:s.name,Contact:s.contact||"",Email:s.email||"",Parts:[...new Set(a.map(x=>partName(x.part)))].join(", "),Total_Concerns:a.length,Closed:c,Open:a.filter(x=>x.status==="Open").length,"Closure %":a.length?Math.round(c/a.length*100):0}});}
+function partRows(){return db.parts.map(p=>{let a=db.concerns.filter(x=>x.part==p.id);return {Part:p.name,Supplier:supplierName(p.supplier),Description:p.desc||"",Total_Concerns:a.length,Closed:a.filter(x=>x.status==="Closed").length,Open:a.filter(x=>x.status==="Open").length}});}
+function exportExcel(){if(typeof XLSX==="undefined")return alert("Excel library could not load. Check internet connection.");let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(excelRows()),"Concerns");XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(supplierRows()),"Supplier Wise");XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(partRows()),"Part Wise");XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(db.suppliers.map(s=>({ID:s.id,Supplier:s.name,Contact:s.contact||"",Email:s.email||""}))),"Suppliers");XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(db.parts.map(p=>({ID:p.id,Part:p.name,Supplier:supplierName(p.supplier),Description:p.desc||""}))),"Parts");XLSX.writeFile(wb,"Supplier_Concern_Report.xlsx");}
+function pickSupplier(){let sid=+$('fq').value;if(sid)return sid;let v=prompt("Enter Supplier ID:
+"+db.suppliers.map(s=>s.id+" = "+s.name).join("\n"));return v?+v:0;}
+function reportText(sid){let a=db.concerns.filter(x=>!sid||x.supplier==sid).sort((x,y)=>y.date.localeCompare(x.date)),name=sid?supplierName(sid):"All Suppliers",c=a.filter(x=>x.status==="Closed").length;return `Supplier Concern Report\nSupplier: ${name}\nTotal: ${a.length} | Open: ${a.length-c} | Closed: ${c} | Closure: ${a.length?Math.round(c/a.length*100):0}%\n\n${a.slice(0,30).map(x=>x.date+" | "+partName(x.part)+" | "+x.title+" | "+x.status+(x.details?" | "+x.details:"" )).join("\n")||"No concerns found."}`;}
+function shareWhatsApp(){let sid=pickSupplier();if(sid&&!db.suppliers.some(s=>s.id==sid))return alert("Invalid Supplier ID.");window.open("https://wa.me/?text="+encodeURIComponent(reportText(sid)),"_blank");}
+function shareEmail(){let sid=pickSupplier(),s=db.suppliers.find(x=>x.id==sid);if(!s||!s.email)return alert("Supplier email not found. Add email first.");let body=reportText(sid)+"\n\nPlease attach the exported Supplier_Concern_Report.xlsx before sending.";location.href="mailto:"+encodeURIComponent(s.email)+"?subject="+encodeURIComponent("Supplier Concern Report - "+s.name)+"&body="+encodeURIComponent(body);}
+async function makeConcernPPT(){if(typeof pptxgen==="undefined")return alert("PPT library could not load. Check internet connection.");let sid=pickSupplier(),s=db.suppliers.find(x=>x.id==sid);if(!s)return alert("Invalid Supplier ID.");let a=db.concerns.filter(x=>x.supplier==sid).sort((x,y)=>y.date.localeCompare(x.date)),c=a.filter(x=>x.status==="Closed").length,pptx=new pptxgen();pptx.layout="LAYOUT_WIDE";pptx.author="Amin Sayyad";let sl=pptx.addSlide();sl.addText("Supplier Concern Report",{x:.6,y:.5,w:12,h:.5,fontSize:28,bold:true});sl.addText(s.name,{x:.6,y:1.2,w:12,h:.45,fontSize:22,bold:true});sl.addText("Prepared by - Amin Sayyad\nContact: "+(s.contact||"-")+"\nEmail: "+(s.email||"-"),{x:.6,y:1.8,w:5,h:1.2,fontSize:15});sl.addText(`Total Concerns: ${a.length}\nOpen: ${a.length-c}\nClosed: ${c}\nClosure: ${a.length?Math.round(c/a.length*100):0}%`,{x:7,y:1.7,w:4.8,h:1.7,fontSize:20,bold:true});let rows=[["Date","Part","Concern","Status"]];a.slice(0,14).forEach(x=>rows.push([x.date,partName(x.part),x.title,x.status]));sl.addTable(rows,{x:.6,y:3.5,w:12,h:3,fontSize:11,border:{type:"solid",color:"CCCCCC",pt:1},margin:.05});await pptx.writeFile({fileName:"Concern_PPT_"+s.name.replace(/[^a-z0-9]+/gi,"_")+".pptx"});}
+function backup(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='supplier-concern-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function restore(e){let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.suppliers||!x.parts||!x.concerns)throw 0;db=x;db.concerns=db.concerns.map(c=>({...c,status:c.status==='Band'?'Closed':(c.status==='Closed'?'Closed':'Open')}));save();alert('Backup restored successfully.')}catch(err){alert('Invalid backup file.')}};r.readAsText(file)}
+function wipe(){if(confirm('Delete all supplier, part and concern data?')){db={suppliers:[],parts:[],concerns:[]};save()}}
+document.addEventListener('DOMContentLoaded',function(){document.getElementById('addSupplierBtn')?.addEventListener('click',addSupplier);document.getElementById('addPartBtn')?.addEventListener('click',addPart);document.getElementById('addConcernBtn')?.addEventListener('click',addConcern);});
+render();
+</script>
+</body>
+</html>
